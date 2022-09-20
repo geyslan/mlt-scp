@@ -54,6 +54,23 @@ print_filter_scopes(filter_scope_t **fscopes)
 }
 
 void
+print_config_entry(config_entry_t *ce)
+{
+    printf(">>> Config Entry\n");
+    printf(" * enabled_scopes:%*s", 30, " ");
+    printb(ce->enabled_scopes);
+    printf("  > uid_filter_enabled in scope%*s", 10, "\t");
+    printb(ce->uid_filter_enabled);
+    printf("  > pid_filter_enabled in scope%*s", 10, "\t");
+    printb(ce->pid_filter_enabled);
+    printf("  > uts_ns_filter_enabled in scope%*s", 10, "\t");
+    printb(ce->uts_ns_filter_enabled);
+    printf("  > comm_filter_enabled in scope%*s", 10, "\t");
+    printb(ce->comm_filter_enabled);
+    printf("\n");
+}
+
+void
 set_filter_scope(filter_scope_t *fscope, uint32_t filters)
 {
     if (!fscope)
@@ -81,8 +98,8 @@ void set_config_entry(config_entry_t *ce, filter_scope_t **fscopes)
 {
     if (!ce || !fscopes)
         return;
-
-    printf(">>> Setting Config Entry\n");
+    
+    ce->enabled_scopes = 0;
     for (int i = 0; i < MAX_SCOPES; i++) {
         filter_scope_t *fs = fscopes[i];
         if (!fs)
@@ -102,18 +119,6 @@ void set_config_entry(config_entry_t *ce, filter_scope_t **fscopes)
         ce->comm_filter_enabled |= (fscopes[i]->comm << i);
         ce->enabled_scopes |= (1 << i);
     }
-
-    printf(" * enabled_scopes:%*s", 30, " ");
-    printb(ce->enabled_scopes);
-    printf("  > uid_filter_enabled in scope%*s", 10, "\t");
-    printb(ce->uid_filter_enabled);
-    printf("  > pid_filter_enabled in scope%*s", 10, "\t");
-    printb(ce->pid_filter_enabled);
-    printf("  > uts_ns_filter_enabled in scope%*s", 10, "\t");
-    printb(ce->uts_ns_filter_enabled);
-    printf("  > comm_filter_enabled in scope%*s", 10, "\t");
-    printb(ce->comm_filter_enabled);
-    printf("\n");
 }
 
 int
@@ -126,11 +131,11 @@ main(void)
         new_filter_scope(UTS_NS_FILTER),
         new_filter_scope(PID_FILTER)
     };
-
     print_filter_scopes(fscopes);
 
     config_entry_t ce = {};
     set_config_entry(&ce, fscopes);
+    print_config_entry(&ce);
 
     return 0;
 }
